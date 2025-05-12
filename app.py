@@ -19,7 +19,7 @@ lineup = {
     "25/09/2025": ["Tribo do Som", "Eletrônica Livre", "Nova Cena"]
 }
 
-# Inicializa estados
+# Inicialização dos estados
 for key in ["reserva_ativa", "pagamento_concluido", "usuario_nome", "data_ingresso", "entrou_na_fila"]:
     if key not in st.session_state:
         st.session_state[key] = "" if key == "usuario_nome" else False if key in ["pagamento_concluido", "entrou_na_fila"] else None
@@ -104,8 +104,8 @@ Código: {codigo}'''
     st.text(ingresso_texto)
     st.download_button("📄 Imprimir ingresso (simulação)", ingresso_texto, file_name="ingresso_RockInRio.txt")
 
-# Botão de Finalizar (com st.stop para reiniciar visualmente)
+# Botão de Finalizar (com limpeza visual usando set_query_params)
 if st.session_state.get("pagamento_concluido"):
     if st.button("Finalizar"):
         resetar_sistema()
-        st.stop()
+        st.experimental_set_query_params()  # força o app a recarregar visualmente
