@@ -4,7 +4,6 @@ from services.reservation import reservar_ingresso, reserva_valida, finalizar_re
 from services.payment import processar_pagamento
 import logging
 from datetime import datetime
-import streamlit.runtime.scriptrunner.script_run_context as script_context
 
 # Log
 logging.basicConfig(filename='logs/system.log', level=logging.INFO,
@@ -30,9 +29,7 @@ def resetar_sistema():
     st.session_state["reserva_ativa"] = None
     st.session_state["pagamento_concluido"] = False
     st.session_state["entrou_na_fila"] = False
-    if script_context.get_script_run_ctx():
-        st.experimental_rerun()
-    return
+    st.experimental_rerun()
 
 st.markdown("ℹ️ *Digite seu nome e pressione Enter para aparecer o botão de fila.*")
 nome = st.text_input("Digite seu nome para entrar na fila", value=st.session_state["usuario_nome"])
@@ -79,14 +76,12 @@ if st.session_state.get("entrou_na_fila") and not st.session_state["pagamento_co
             st.success("🎉 Compra finalizada com sucesso!")
             st.session_state["reserva_ativa"] = None
             st.session_state["pagamento_concluido"] = True
-            if script_context.get_script_run_ctx():
-                st.experimental_rerun()
+            st.experimental_rerun()
         else:
             liberar_proximo()
             st.error("Tempo de reserva expirado.")
             st.session_state["reserva_ativa"] = None
-            if script_context.get_script_run_ctx():
-                st.experimental_rerun()
+            st.experimental_rerun()
 
 if st.session_state.get("pagamento_concluido") and st.session_state.get("usuario_nome"):
     nome = st.session_state["usuario_nome"]
