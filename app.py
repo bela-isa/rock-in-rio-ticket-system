@@ -19,7 +19,7 @@ lineup = {
     "25/09/2025": ["Tribo do Som", "Eletrônica Livre", "Nova Cena"]
 }
 
-# Inicialização dos estados
+# Inicializa os estados
 for key in ["reserva_ativa", "pagamento_concluido", "usuario_nome", "data_ingresso", "entrou_na_fila"]:
     if key not in st.session_state:
         st.session_state[key] = "" if key == "usuario_nome" else False if key in ["pagamento_concluido", "entrou_na_fila"] else None
@@ -52,7 +52,7 @@ if nome:
             else:
                 st.info("Aguardando sua vez na fila...")
 
-# Escolha do dia e pagamento
+# Escolha de data e pagamento
 if st.session_state.get("entrou_na_fila") and not st.session_state["pagamento_concluido"]:
     data_escolhida = st.selectbox("Escolha o dia do evento", list(lineup.keys()))
     st.session_state["data_ingresso"] = data_escolhida
@@ -104,8 +104,8 @@ Código: {codigo}'''
     st.text(ingresso_texto)
     st.download_button("📄 Imprimir ingresso (simulação)", ingresso_texto, file_name="ingresso_RockInRio.txt")
 
-# Botão de Finalizar (com limpeza visual usando set_query_params)
+# Finalizar (com novo método)
 if st.session_state.get("pagamento_concluido"):
     if st.button("Finalizar"):
         resetar_sistema()
-        st.experimental_set_query_params()  # força o app a recarregar visualmente
+        st.query_params.clear()  # nova abordagem oficial para limpar a URL e "recarregar"
