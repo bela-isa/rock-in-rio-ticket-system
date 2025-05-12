@@ -105,7 +105,8 @@ Código: {codigo}'''
     st.download_button("📄 Imprimir ingresso (simulação)", ingresso_texto, file_name="ingresso_RockInRio.txt")
 
 # Finalizar (com novo método)
-if st.session_state.get("pagamento_concluido"):
-    if st.button("Finalizar"):
-        resetar_sistema()
-        st.query_params.clear()  # nova abordagem oficial para limpar a URL e "recarregar"
+if st.button("Finalizar"):
+    resetar_sistema()
+    st.query_params.clear()
+    st.experimental_rerun()
+
