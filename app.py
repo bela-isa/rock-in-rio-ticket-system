@@ -19,6 +19,7 @@ lineup = {
     "25/09/2025": ["Tribo do Som", "Eletrônica Livre", "Nova Cena"]
 }
 
+# Inicializa estados
 for key in ["reserva_ativa", "pagamento_concluido", "usuario_nome", "data_ingresso", "entrou_na_fila"]:
     if key not in st.session_state:
         st.session_state[key] = "" if key == "usuario_nome" else False if key in ["pagamento_concluido", "entrou_na_fila"] else None
@@ -29,8 +30,8 @@ def resetar_sistema():
     st.session_state["reserva_ativa"] = None
     st.session_state["pagamento_concluido"] = False
     st.session_state["entrou_na_fila"] = False
-    st.experimental_rerun()
 
+# Entrada do nome
 st.markdown("ℹ️ *Digite seu nome e pressione Enter para aparecer o botão de fila.*")
 nome = st.text_input("Digite seu nome para entrar na fila", value=st.session_state["usuario_nome"])
 
@@ -51,6 +52,7 @@ if nome:
             else:
                 st.info("Aguardando sua vez na fila...")
 
+# Escolha do dia e pagamento
 if st.session_state.get("entrou_na_fila") and not st.session_state["pagamento_concluido"]:
     data_escolhida = st.selectbox("Escolha o dia do evento", list(lineup.keys()))
     st.session_state["data_ingresso"] = data_escolhida
@@ -76,13 +78,12 @@ if st.session_state.get("entrou_na_fila") and not st.session_state["pagamento_co
             st.success("🎉 Compra finalizada com sucesso!")
             st.session_state["reserva_ativa"] = None
             st.session_state["pagamento_concluido"] = True
-            st.experimental_rerun()
         else:
             liberar_proximo()
             st.error("Tempo de reserva expirado.")
             st.session_state["reserva_ativa"] = None
-            st.experimental_rerun()
 
+# Exibição do ingresso
 if st.session_state.get("pagamento_concluido") and st.session_state.get("usuario_nome"):
     nome = st.session_state["usuario_nome"]
     data = st.session_state.get("data_ingresso")
@@ -103,6 +104,7 @@ Código: {codigo}'''
     st.text(ingresso_texto)
     st.download_button("📄 Imprimir ingresso (simulação)", ingresso_texto, file_name="ingresso_RockInRio.txt")
 
+# Botão de Finalizar (só após pagamento)
 if st.session_state.get("pagamento_concluido"):
     if st.button("Finalizar"):
         resetar_sistema()
