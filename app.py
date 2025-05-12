@@ -4,6 +4,7 @@ from services.reservation import reservar_ingresso, reserva_valida, finalizar_re
 from services.payment import processar_pagamento
 import logging
 from datetime import datetime
+import streamlit.runtime.scriptrunner.script_run_context as script_context
 
 # Log
 logging.basicConfig(filename='logs/system.log', level=logging.INFO,
@@ -19,22 +20,20 @@ lineup = {
     "25/09/2025": ["Tribo do Som", "Eletrônica Livre", "Nova Cena"]
 }
 
-# Inicialização de estado
 for key in ["reserva_ativa", "pagamento_concluido", "usuario_nome", "data_ingresso", "entrou_na_fila"]:
     if key not in st.session_state:
         st.session_state[key] = "" if key == "usuario_nome" else False if key in ["pagamento_concluido", "entrou_na_fila"] else None
 
-# Função de reset total
 def resetar_sistema():
     st.session_state["usuario_nome"] = ""
     st.session_state["data_ingresso"] = None
     st.session_state["reserva_ativa"] = None
     st.session_state["pagamento_concluido"] = False
     st.session_state["entrou_na_fila"] = False
-    st.experimental_rerun()
-    return  # <- evita que o restante da interface seja renderizado antes do rerun
+    if script_context.get_script_run_ctx():
+        st.experimental_rerun()
+    return
 
-# Entrada de nome
 st.markdown("ℹ️ *Digite seu nome e pressione Enter para aparecer o botão de fila.*")
 nome = st.text_input("Digite seu nome para entrar na fila", value=st.session_state["usuario_nome"])
 
@@ -55,7 +54,6 @@ if nome:
             else:
                 st.info("Aguardando sua vez na fila...")
 
-# Escolha de data e pagamento
 if st.session_state.get("entrou_na_fila") and not st.session_state["pagamento_concluido"]:
     data_escolhida = st.selectbox("Escolha o dia do evento", list(lineup.keys()))
     st.session_state["data_ingresso"] = data_escolhida
@@ -81,14 +79,15 @@ if st.session_state.get("entrou_na_fila") and not st.session_state["pagamento_co
             st.success("🎉 Compra finalizada com sucesso!")
             st.session_state["reserva_ativa"] = None
             st.session_state["pagamento_concluido"] = True
-            st.experimental_rerun()
+            if script_context.get_script_run_ctx():
+                st.experimental_rerun()
         else:
             liberar_proximo()
             st.error("Tempo de reserva expirado.")
             st.session_state["reserva_ativa"] = None
-            st.experimental_rerun()
+            if script_context.get_script_run_ctx():
+                st.experimental_rerun()
 
-# Ingresso final
 if st.session_state.get("pagamento_concluido") and st.session_state.get("usuario_nome"):
     nome = st.session_state["usuario_nome"]
     data = st.session_state.get("data_ingresso")
@@ -96,20 +95,19 @@ if st.session_state.get("pagamento_concluido") and st.session_state.get("usuario
     codigo = f"#{datetime.now().strftime('%H%M%S')}{nome[:3].upper()}"
 
     st.subheader("📄 Informações do Ingresso")
-    #st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Ticket_icon.png/480px-Ticket_icon.png", width=200)
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Ticket_icon.png/480px-Ticket_icon.png", width=200)
 
-    ingresso_texto = f"""Evento: Rock in Rio
+    ingresso_texto = f'''Evento: Rock in Rio
 Nome: {nome}
 Data: {data}
 Horário: 18:00
 Local: Parque Olímpico - RJ
 Line-up: {', '.join(artistas)}
-Código: {codigo}"""
+Código: {codigo}'''
 
     st.text(ingresso_texto)
     st.download_button("📄 Imprimir ingresso (simulação)", ingresso_texto, file_name="ingresso_RockInRio.txt")
 
-# Mostra botão "Finalizar" só após pagamento
 if st.session_state.get("pagamento_concluido"):
     if st.button("Finalizar"):
         resetar_sistema()
