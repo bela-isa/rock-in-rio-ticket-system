@@ -1,13 +1,27 @@
 import streamlit as st
+import os
 from services.queue import entrar_na_fila, liberar_proximo, ingressos_disponiveis
 from services.reservation import reservar_ingresso, reserva_valida, finalizar_reserva
 from services.payment import processar_pagamento
 import logging
 from datetime import datetime
 
-# Log
-logging.basicConfig(filename='logs/system.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# Configuração do diretório de logs
+log_dir = 'logs'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+logging.basicConfig(
+    filename=os.path.join(log_dir, 'system.log'),
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+# Configuração da página Streamlit
+st.set_page_config(
+    page_title="Rock in Rio - Ingressos",
+    page_icon="🎫",
+    layout="centered"
+)
 
 st.title("🎫 Sistema de Ingressos - Rock in Rio")
 
