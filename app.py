@@ -104,7 +104,8 @@ Código: {codigo}'''
     st.text(ingresso_texto)
     st.download_button("📄 Imprimir ingresso (simulação)", ingresso_texto, file_name="ingresso_RockInRio.txt")
 
-# Botão de Finalizar (só após pagamento)
+# Botão de Finalizar (com st.stop para reiniciar visualmente)
 if st.session_state.get("pagamento_concluido"):
     if st.button("Finalizar"):
         resetar_sistema()
+        st.stop()
