@@ -23,17 +23,30 @@ type LogEntry = {
   details: string;
 };
 
+type PaymentForm = {
+  name: string;
+  cpf: string;
+  email: string;
+  card: string;
+  expiry: string;
+  cvv: string;
+};
+
+type PaymentField = keyof PaymentForm;
+type FormErrors = Partial<Record<PaymentField, string>>;
+
 type DayKey = 'day1' | 'day2' | 'day3';
 
 const RockInRioTickets = () => {
-  const [currentStep, setCurrentStep] = useState('welcome');
+  const [currentStep, setCurrentStep] = useState<'welcome' | 'queue' | 'selectDay' | 'reservation' | 'ticket'>('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
   const [reservationTime, setReservationTime] = useState(600);
-  const [ticketData, setTicketData] = useState<any>(null);
+  const [ticketData, setTicketData] = useState<any>(null); // (opcional: depois tipamos melhor)
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentForm, setPaymentForm] = useState({
+
+  const [paymentForm, setPaymentForm] = useState<PaymentForm>({
     name: '',
     cpf: '',
     email: '',
@@ -41,7 +54,8 @@ const RockInRioTickets = () => {
     expiry: '',
     cvv: ''
   });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   const lineup: Record<
     DayKey,
@@ -108,6 +122,7 @@ const RockInRioTickets = () => {
           return prev - 1;
         });
       }, 2000);
+
       return () => clearInterval(timer);
     }
   }, [currentStep, queuePosition, addLog]);
@@ -124,6 +139,7 @@ const RockInRioTickets = () => {
           return prev - 1;
         });
       }, 1000);
+
       return () => clearInterval(timer);
     }
   }, [currentStep, reservationTime]);
@@ -145,26 +161,27 @@ const RockInRioTickets = () => {
     addLog('🎫 Dia selecionado', `${lineup[day].date} - ${lineup[day].headliner}`);
   };
 
-
-  const handleFormChange = (field, value) => {
+  const handleFormChange = (field: PaymentField, value: string) => {
     setPaymentForm(prev => ({ ...prev, [field]: value }));
     setFormErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  const validateForm = () => {
-    const errors = {};
-    
+  const validateForm = (): FormErrors => {
+    const errors: FormErrors = {};
+
     if (!paymentForm.name.trim()) errors.name = 'Nome é obrigatório';
+
     if (!paymentForm.cpf.trim()) errors.cpf = 'CPF é obrigatório';
-    else if (paymentForm.cpf.length < 11) errors.cpf = 'CPF inválido';
-    
+    else if (paymentForm.cpf.replace(/\D/g, '').length < 11) errors.cpf = 'CPF inválido';
+
     if (!paymentForm.email.trim()) errors.email = 'Email é obrigatório';
     else if (!/\S+@\S+\.\S+/.test(paymentForm.email)) errors.email = 'Email inválido';
-    
+
     if (!paymentForm.card.trim()) errors.card = 'Número do cartão é obrigatório';
     else if (paymentForm.card.replace(/\s/g, '').length < 16) errors.card = 'Número do cartão inválido';
-    
+
     if (!paymentForm.expiry.trim()) errors.expiry = 'Validade é obrigatória';
+
     if (!paymentForm.cvv.trim()) errors.cvv = 'CVV é obrigatório';
     else if (paymentForm.cvv.length < 3) errors.cvv = 'CVV inválido';
 
@@ -172,8 +189,15 @@ const RockInRioTickets = () => {
   };
 
   const handlePayment = () => {
+    // ✅ guard importante (evita lineup[selectedDay] com null)
+    if (!selectedDay) {
+      addLog('❌ Erro', 'Nenhum dia selecionado');
+      alert('Selecione um dia antes de continuar.');
+      return;
+    }
+
     const errors = validateForm();
-    
+
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       addLog('❌ Erro de validação', 'Dados do formulário incompletos ou inválidos');
@@ -195,7 +219,7 @@ const RockInRioTickets = () => {
         gate: `PORTÃO ${Math.floor(Math.random() * 10) + 1}`,
         price: 'R$ 890,00'
       };
-      
+
       setTicketData(ticket);
       setCurrentStep('ticket');
       setIsProcessing(false);
@@ -204,6 +228,7 @@ const RockInRioTickets = () => {
   };
 
   const handlePrint = () => {
+    if (!ticketData) return;
     addLog('🖨️ Solicitação de impressão', `Ingresso ID: ${ticketData.id}`);
     window.print();
   };
@@ -227,18 +252,19 @@ const RockInRioTickets = () => {
     setFormErrors({});
   };
 
-  const formatTime = (seconds) => {
+  // ✅ TIPOS adicionados (evitam TS7006)
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatCPF = (value) => {
+  const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  const formatCard = (value) => {
+  const formatCard = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
   };
@@ -248,8 +274,14 @@ const RockInRioTickets = () => {
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: '1s' }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: '2s' }}
+        ></div>
       </div>
 
       {/* Header */}
@@ -268,11 +300,13 @@ const RockInRioTickets = () => {
                 <p className="text-sm text-gray-400 font-medium">Sistema Oficial de Ingressos</p>
               </div>
             </div>
+
             <div className="hidden sm:flex items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-full">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-sm font-semibold text-green-400">Online</span>
               </div>
+
               {currentStep === 'ticket' && (
                 <button
                   onClick={resetApplication}
