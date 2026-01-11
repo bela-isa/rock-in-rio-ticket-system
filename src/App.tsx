@@ -1,5 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Ticket, Calendar, CreditCard, Clock, Users, Music, CheckCircle, Printer, RotateCcw, AlertCircle, Zap, Star, TrendingUp, Shield } from 'lucide-react';
+import {
+  Ticket,
+  Calendar,
+  CreditCard,
+  Clock,
+  Users,
+  Music,
+  CheckCircle,
+  Printer,
+  RotateCcw,
+  AlertCircle,
+  Zap,
+  Star,
+  TrendingUp,
+  Shield
+} from 'lucide-react';
 
 type LogEntry = {
   id: number;
@@ -8,12 +23,14 @@ type LogEntry = {
   details: string;
 };
 
+type DayKey = 'day1' | 'day2' | 'day3';
+
 const RockInRioTickets = () => {
   const [currentStep, setCurrentStep] = useState('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
-  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
   const [reservationTime, setReservationTime] = useState(600);
-  const [ticketData, setTicketData] = useState(null);
+  const [ticketData, setTicketData] = useState<any>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentForm, setPaymentForm] = useState({
@@ -24,9 +41,19 @@ const RockInRioTickets = () => {
     expiry: '',
     cvv: ''
   });
-  const [formErrors, setFormErrors] = useState({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const lineup = {
+  const lineup: Record<
+    DayKey,
+    {
+      date: string;
+      day: string;
+      headliner: string;
+      bands: string[];
+      genre: string;
+      color: string;
+    }
+  > = {
     day1: {
       date: '15 de Setembro, 2024',
       day: 'Sexta-feira',
@@ -52,7 +79,7 @@ const RockInRioTickets = () => {
       color: 'from-purple-600 to-pink-600'
     }
   };
-  
+
   const addLog = useCallback((action: string, details: string = '') => {
     const timestamp = new Date().toLocaleString('pt-BR');
     const logEntry: LogEntry = {
@@ -112,11 +139,12 @@ const RockInRioTickets = () => {
     addLog('Usuário iniciou o processo', 'Entrando na fila de espera');
   };
 
-  const handleDaySelection = (day) => {
+  const handleDaySelection = (day: DayKey) => {
     setSelectedDay(day);
     setCurrentStep('reservation');
     addLog('🎫 Dia selecionado', `${lineup[day].date} - ${lineup[day].headliner}`);
   };
+
 
   const handleFormChange = (field, value) => {
     setPaymentForm(prev => ({ ...prev, [field]: value }));
