@@ -1,7 +1,6 @@
 # 🎸 Rock in Rio 2024 - Sistema de Ingressos
 
 ![Status](https://img.shields.io/badge/status-active-success.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-3178C6?logo=typescript)
 
@@ -127,15 +126,11 @@ Demonstrar competências em:
 - Validações e tratamento de erros
 - Clean code e boas práticas
 
-## 📝 Licença
-
-Este projeto está sob a licença MIT.
-
 ## 👩‍💻 Desenvolvedor
 
-**[Isabela Neves]**
+**Isabela Neves**
 
-- 💼 LinkedIn: [https://www.linkedin.com/in/isabela-neves-analista/]
+- 💼 LinkedIn: [(https://www.linkedin.com/in/isabela-neves-analista/)]
 - 🐙 GitHub: [@bela-isa](https://github.com/bela-isa)
 
 ---
@@ -149,6 +144,3 @@ Este projeto pode ser facilmente implantado em:
 - [Netlify](https://netlify.com)
 - [GitHub Pages](https://pages.github.com)
 
----
-
-Desenvolvido com ❤️ e muita música! 🎸
