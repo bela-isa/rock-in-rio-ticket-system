@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Ticket, Calendar, CreditCard, Clock, Users, Music, CheckCircle, Printer, RotateCcw, AlertCircle, Zap, Star, TrendingUp, Shield } from 'lucide-react';
 
+type LogEntry = {
+  id: number;
+  timestamp: string;
+  action: string;
+  details: string;
+};
+
 const RockInRioTickets = () => {
   const [currentStep, setCurrentStep] = useState('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
   const [selectedDay, setSelectedDay] = useState(null);
   const [reservationTime, setReservationTime] = useState(600);
   const [ticketData, setTicketData] = useState(null);
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentForm, setPaymentForm] = useState({
     name: '',
@@ -48,15 +55,14 @@ const RockInRioTickets = () => {
   
   const addLog = useCallback((action: string, details: string = '') => {
     const timestamp = new Date().toLocaleString('pt-BR');
-    const logEntry = {
+    const logEntry: LogEntry = {
       timestamp,
       action,
       details,
       id: Date.now()
     };
-  setLogs(prev => [logEntry, ...prev].slice(0, 50));
-}, []);
-
+    setLogs(prev => [logEntry, ...prev].slice(0, 50));
+  }, []);
 
   useEffect(() => {
     addLog('Sistema inicializado', 'Rock in Rio Tickets v1.0');
