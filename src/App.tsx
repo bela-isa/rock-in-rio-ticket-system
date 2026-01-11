@@ -45,8 +45,8 @@ const RockInRioTickets = () => {
       color: 'from-purple-600 to-pink-600'
     }
   };
-
-  const addLog = useCallback((action, details = '') => {
+  
+  const addLog = useCallback((action: string, details: string = '') => {
     const timestamp = new Date().toLocaleString('pt-BR');
     const logEntry = {
       timestamp,
@@ -54,8 +54,9 @@ const RockInRioTickets = () => {
       details,
       id: Date.now()
     };
-    setLogs(prev => [logEntry, ...prev].slice(0, 50));
-  }, []);
+  setLogs(prev => [logEntry, ...prev].slice(0, 50));
+}, []);
+
 
   useEffect(() => {
     addLog('Sistema inicializado', 'Rock in Rio Tickets v1.0');
