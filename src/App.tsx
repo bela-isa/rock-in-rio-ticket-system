@@ -1,15 +1,57 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Ticket, Calendar, CreditCard, Clock, Users, Music, CheckCircle, Printer, RotateCcw, AlertCircle, Zap, Star, TrendingUp, Shield } from 'lucide-react';
 
+// Interfaces TypeScript
+interface LineupDay {
+  date: string;
+  day: string;
+  headliner: string;
+  bands: string[];
+  genre: string;
+  color: string;
+}
+
+interface Lineup {
+  [key: string]: LineupDay;
+}
+
+interface TicketData {
+  id: string;
+  name: string;
+  cpf: string;
+  email: string;
+  day: LineupDay;
+  purchaseDate: string;
+  sector: string;
+  gate: string;
+  price: string;
+}
+
+interface LogEntry {
+  timestamp: string;
+  action: string;
+  details: string;
+  id: number;
+}
+
+interface PaymentForm {
+  name: string;
+  cpf: string;
+  email: string;
+  card: string;
+  expiry: string;
+  cvv: string;
+}
+
 const App = () => {
   const [currentStep, setCurrentStep] = useState('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [reservationTime, setReservationTime] = useState(600);
-  const [ticketData, setTicketData] = useState<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [ticketData, setTicketData] = useState<TicketData | null>(null);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentForm, setPaymentForm] = useState({
+  const [paymentForm, setPaymentForm] = useState<PaymentForm>({
     name: '',
     cpf: '',
     email: '',
@@ -17,9 +59,9 @@ const App = () => {
     expiry: '',
     cvv: ''
   });
-  const [formErrors, setFormErrors] = useState<any>({});
+  const [formErrors, setFormErrors] = useState<Partial<PaymentForm>>({});
 
-  const lineup: any = {
+  const lineup: Lineup = {
     day1: {
       date: '15 de Setembro, 2024',
       day: 'Sexta-feira',
@@ -48,7 +90,7 @@ const App = () => {
 
   const addLog = useCallback((action: string, details = '') => {
     const timestamp = new Date().toLocaleString('pt-BR');
-    const logEntry = {
+    const logEntry: LogEntry = {
       timestamp,
       action,
       details,
@@ -130,13 +172,13 @@ const App = () => {
     addLog('🎫 Dia selecionado', `${lineup[day].date} - ${lineup[day].headliner}`);
   };
 
-  const handleFormChange = (field: string, value: string) => {
+  const handleFormChange = (field: keyof PaymentForm, value: string) => {
     setPaymentForm(prev => ({ ...prev, [field]: value }));
-    setFormErrors((prev: any) => ({ ...prev, [field]: '' }));
+    setFormErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  const validateForm = () => {
-    const errors: any = {};
+  const validateForm = (): Partial<PaymentForm> => {
+    const errors: Partial<PaymentForm> = {};
     
     if (!paymentForm.name.trim()) errors.name = 'Nome é obrigatório';
     if (!paymentForm.cpf.trim()) errors.cpf = 'CPF é obrigatório';
@@ -168,7 +210,7 @@ const App = () => {
     addLog('💳 Processando pagamento', `Cartão final: ${paymentForm.card.slice(-4)}`);
 
     setTimeout(() => {
-      const ticket = {
+      const ticket: TicketData = {
         id: `RIR2024${Date.now().toString().slice(-8)}`,
         name: paymentForm.name,
         cpf: paymentForm.cpf,
@@ -188,22 +230,24 @@ const App = () => {
   };
 
   const handlePrint = () => {
-    addLog('🖨️ Solicitação de impressão', `Ingresso ID: ${ticketData.id}`);
-    window.print();
+    if (ticketData) {
+      addLog('🖨️ Solicitação de impressão', `Ingresso ID: ${ticketData.id}`);
+      window.print();
+    }
   };
 
-  const formatTime = (seconds: number) => {
+  const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatCPF = (value: string) => {
+  const formatCPF = (value: string): string => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  const formatCard = (value: string) => {
+  const formatCard = (value: string): string => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
   };
@@ -392,7 +436,7 @@ const App = () => {
                           <div>
                             <p className="text-sm text-gray-400 mb-2">Mais atrações:</p>
                             <div className="flex flex-wrap gap-2">
-                              {day.bands.map((band: string, idx: number) => (
+                              {day.bands.map((band, idx) => (
                                 <span
                                   key={idx}
                                   className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-sm border border-white/20 transition-colors"
