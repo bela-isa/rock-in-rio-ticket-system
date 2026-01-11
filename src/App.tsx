@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Ticket, Calendar, CreditCard, Clock, Users, Music, CheckCircle, Printer, RotateCcw, AlertCircle, Zap, Star, TrendingUp, Shield } from 'lucide-react';
 
 const App = () => {
-  const [currentStep, setCurrentStep] = useState('welcome');
+  type Step = 'welcome' | 'queue' | 'selectDay' | 'reservation' | 'ticket';
+  const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [reservationTime, setReservationTime] = useState(600);
