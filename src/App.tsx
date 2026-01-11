@@ -459,7 +459,7 @@ const RockInRioTickets = () => {
             )}
 
             {/* Payment Step */}
-            {currentStep === 'reservation' && (
+            {currentStep === 'reservation' && selectedDay && (
               <div className="space-y-6">
                 <div className={`relative bg-gradient-to-r ${reservationTime < 120 ? 'from-red-600/30 to-orange-600/30 border-red-500/50' : 'from-pink-600/30 to-purple-600/30 border-pink-500/50'} backdrop-blur-xl rounded-2xl p-6 border transition-all`}>
                   <div className="flex items-center justify-between">
