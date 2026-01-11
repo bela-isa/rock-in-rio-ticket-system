@@ -142,13 +142,13 @@ const RockInRioTickets = () => {
 
       return () => clearInterval(timer);
     }
-  }, [currentStep, reservationTime]);
+  }, [currentStep, reservationTime, handleTimeout]);
 
-  const handleTimeout = () => {
+  const handleTimeout = useCallback(() => {
     addLog('⏰ Reserva expirada', 'Tempo limite de 10 minutos atingido');
     alert('⏰ Tempo esgotado! Sua reserva expirou. Você será redirecionado para o início.');
     resetApplication();
-  };
+  }, [addLog, resetApplication]);
 
   const handleWelcomeStart = () => {
     setCurrentStep('queue');
@@ -233,7 +233,7 @@ const RockInRioTickets = () => {
     window.print();
   };
 
-  const resetApplication = () => {
+  const resetApplication = useCallback(() => {
     addLog('🔄 Sistema reiniciado', 'Nova sessão iniciada');
     setCurrentStep('welcome');
     setQueuePosition(Math.floor(Math.random() * 5) + 2);
@@ -250,7 +250,7 @@ const RockInRioTickets = () => {
       cvv: ''
     });
     setFormErrors({});
-  };
+  }, [addLog]);
 
   // ✅ TIPOS adicionados (evitam TS7006)
   const formatTime = (seconds: number) => {
@@ -377,15 +377,21 @@ const RockInRioTickets = () => {
                 </div>
 
                 <div className="grid sm:grid-cols-3 gap-4">
-                  {Object.entries(lineup).map(([key, day]) => (
-                    <div key={key} className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-pink-500/50 transition-all">
-                      <div className={`inline-flex px-3 py-1 bg-gradient-to-r ${day.color} rounded-full text-xs font-bold mb-3`}>
+                  {(Object.entries(lineup) as Array<[DayKey, (typeof lineup)[DayKey]]>).map(([key, day]) => (
+                    <div
+                      key={key}
+                      className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-pink-500/50 transition-all"
+                    >
+                      <div
+                        className={`inline-flex px-3 py-1 bg-gradient-to-r ${day.color} rounded-full text-xs font-bold mb-3`}
+                      >
                         {day.day}
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">{day.headliner}</h3>
                       <p className="text-sm text-gray-400">{day.genre}</p>
                     </div>
                   ))}
+
                 </div>
               </div>
             )}
@@ -440,10 +446,11 @@ const RockInRioTickets = () => {
                 </div>
 
                 <div className="grid gap-6">
-                  {Object.entries(lineup).map(([key, day]) => (
+                  {(Object.entries(lineup) as Array<[DayKey, (typeof lineup)[DayKey]]>).map(([key, day]) => (
                     <button
                       key={key}
                       onClick={() => handleDaySelection(key)}
+
                       className="group relative bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-pink-500 hover:bg-black/60 transition-all text-left overflow-hidden"
                     >
                       <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${day.color} opacity-0 group-hover:opacity-20 blur-3xl transition-opacity`}></div>
