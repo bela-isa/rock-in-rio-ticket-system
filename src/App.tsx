@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Ticket, Calendar, CreditCard, Clock, Users, Music, CheckCircle, Printer, RotateCcw, AlertCircle, Zap, Star, TrendingUp, Shield } from 'lucide-react';
 
 const App = () => {
-  type Step = 'welcome' | 'queue' | 'selectDay' | 'reservation' | 'ticket';
-  const [currentStep, setCurrentStep] = useState<Step>('welcome');
+  const [currentStep, setCurrentStep] = useState('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [reservationTime, setReservationTime] = useState(600);
@@ -584,7 +583,6 @@ const App = () => {
               </div>
             )}
 
-            {/* Ticket Step */}
             {currentStep === 'ticket' && ticketData && (
               <div className="space-y-6">
                 <div className="bg-gradient-to-r from-green-600/30 to-emerald-600/30 backdrop-blur-xl rounded-2xl p-6 border border-green-500/50 shadow-2xl">
@@ -600,7 +598,6 @@ const App = () => {
                 </div>
 
                 <div id="ticket-print" className="bg-white text-black rounded-3xl shadow-2xl overflow-hidden border-4 border-dashed border-pink-500">
-                  {/* Ticket Header */}
                   <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -614,7 +611,6 @@ const App = () => {
                     </div>
                   </div>
 
-                  {/* Ticket Body */}
                   <div className="p-8 space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                       <div>
@@ -705,7 +701,6 @@ const App = () => {
             )}
           </div>
 
-          {/* Logs Panel - Discreto */}
           <div className="lg:col-span-1">
             <details className="group bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 sticky top-24 shadow-xl">
               <summary className="cursor-pointer p-4 hover:bg-white/5 rounded-2xl transition-all list-none">
@@ -818,4 +813,4 @@ const App = () => {
   );
 };
 
-export default RockInRioTickets;
+export default App;
