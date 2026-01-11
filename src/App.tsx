@@ -1,52 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Ticket,
-  Calendar,
-  CreditCard,
-  Clock,
-  Users,
-  Music,
-  CheckCircle,
-  Printer,
-  RotateCcw,
-  AlertCircle,
-  Zap,
-  Star,
-  TrendingUp,
-  Shield
-} from 'lucide-react';
+import { Ticket, Calendar, CreditCard, Clock, Users, Music, CheckCircle, Printer, RotateCcw, AlertCircle, Zap, Star, TrendingUp, Shield } from 'lucide-react';
 
-type LogEntry = {
-  id: number;
-  timestamp: string;
-  action: string;
-  details: string;
-};
-
-type PaymentForm = {
-  name: string;
-  cpf: string;
-  email: string;
-  card: string;
-  expiry: string;
-  cvv: string;
-};
-
-type PaymentField = keyof PaymentForm;
-type FormErrors = Partial<Record<PaymentField, string>>;
-
-type DayKey = 'day1' | 'day2' | 'day3';
-
-const RockInRioTickets = () => {
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'queue' | 'selectDay' | 'reservation' | 'ticket'>('welcome');
+const App = () => {
+  const [currentStep, setCurrentStep] = useState('welcome');
   const [queuePosition, setQueuePosition] = useState(3);
-  const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [reservationTime, setReservationTime] = useState(600);
-  const [ticketData, setTicketData] = useState<any>(null); // (opcional: depois tipamos melhor)
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [ticketData, setTicketData] = useState<any>(null);
+  const [logs, setLogs] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const [paymentForm, setPaymentForm] = useState<PaymentForm>({
+  const [paymentForm, setPaymentForm] = useState({
     name: '',
     cpf: '',
     email: '',
@@ -54,20 +17,9 @@ const RockInRioTickets = () => {
     expiry: '',
     cvv: ''
   });
+  const [formErrors, setFormErrors] = useState<any>({});
 
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-
-  const lineup: Record<
-    DayKey,
-    {
-      date: string;
-      day: string;
-      headliner: string;
-      bands: string[];
-      genre: string;
-      color: string;
-    }
-  > = {
+  const lineup: any = {
     day1: {
       date: '15 de Setembro, 2024',
       day: 'Sexta-feira',
@@ -94,9 +46,9 @@ const RockInRioTickets = () => {
     }
   };
 
-  const addLog = useCallback((action: string, details: string = '') => {
+  const addLog = useCallback((action: string, details = '') => {
     const timestamp = new Date().toLocaleString('pt-BR');
-    const logEntry: LogEntry = {
+    const logEntry = {
       timestamp,
       action,
       details,
@@ -104,134 +56,6 @@ const RockInRioTickets = () => {
     };
     setLogs(prev => [logEntry, ...prev].slice(0, 50));
   }, []);
-
-  useEffect(() => {
-    addLog('Sistema inicializado', 'Rock in Rio Tickets v1.0');
-  }, [addLog]);
-
-  useEffect(() => {
-    if (currentStep === 'queue' && queuePosition > 0) {
-      const timer = setInterval(() => {
-        setQueuePosition(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setCurrentStep('selectDay');
-            addLog('Acesso liberado', 'Usuário entrou no sistema de compra');
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 2000);
-
-      return () => clearInterval(timer);
-    }
-  }, [currentStep, queuePosition, addLog]);
-
-  useEffect(() => {
-    if (currentStep === 'reservation' && reservationTime > 0) {
-      const timer = setInterval(() => {
-        setReservationTime(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            handleTimeout();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-  }, [currentStep, reservationTime, handleTimeout]);
-
-  const handleTimeout = useCallback(() => {
-    addLog('⏰ Reserva expirada', 'Tempo limite de 10 minutos atingido');
-    alert('⏰ Tempo esgotado! Sua reserva expirou. Você será redirecionado para o início.');
-    resetApplication();
-  }, [addLog, resetApplication]);
-
-  const handleWelcomeStart = () => {
-    setCurrentStep('queue');
-    addLog('Usuário iniciou o processo', 'Entrando na fila de espera');
-  };
-
-  const handleDaySelection = (day: DayKey) => {
-    setSelectedDay(day);
-    setCurrentStep('reservation');
-    addLog('🎫 Dia selecionado', `${lineup[day].date} - ${lineup[day].headliner}`);
-  };
-
-  const handleFormChange = (field: PaymentField, value: string) => {
-    setPaymentForm(prev => ({ ...prev, [field]: value }));
-    setFormErrors(prev => ({ ...prev, [field]: '' }));
-  };
-
-  const validateForm = (): FormErrors => {
-    const errors: FormErrors = {};
-
-    if (!paymentForm.name.trim()) errors.name = 'Nome é obrigatório';
-
-    if (!paymentForm.cpf.trim()) errors.cpf = 'CPF é obrigatório';
-    else if (paymentForm.cpf.replace(/\D/g, '').length < 11) errors.cpf = 'CPF inválido';
-
-    if (!paymentForm.email.trim()) errors.email = 'Email é obrigatório';
-    else if (!/\S+@\S+\.\S+/.test(paymentForm.email)) errors.email = 'Email inválido';
-
-    if (!paymentForm.card.trim()) errors.card = 'Número do cartão é obrigatório';
-    else if (paymentForm.card.replace(/\s/g, '').length < 16) errors.card = 'Número do cartão inválido';
-
-    if (!paymentForm.expiry.trim()) errors.expiry = 'Validade é obrigatória';
-
-    if (!paymentForm.cvv.trim()) errors.cvv = 'CVV é obrigatório';
-    else if (paymentForm.cvv.length < 3) errors.cvv = 'CVV inválido';
-
-    return errors;
-  };
-
-  const handlePayment = () => {
-    // ✅ guard importante (evita lineup[selectedDay] com null)
-    if (!selectedDay) {
-      addLog('❌ Erro', 'Nenhum dia selecionado');
-      alert('Selecione um dia antes de continuar.');
-      return;
-    }
-
-    const errors = validateForm();
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      addLog('❌ Erro de validação', 'Dados do formulário incompletos ou inválidos');
-      return;
-    }
-
-    setIsProcessing(true);
-    addLog('💳 Processando pagamento', `Cartão final: ${paymentForm.card.slice(-4)}`);
-
-    setTimeout(() => {
-      const ticket = {
-        id: `RIR2024${Date.now().toString().slice(-8)}`,
-        name: paymentForm.name,
-        cpf: paymentForm.cpf,
-        email: paymentForm.email,
-        day: lineup[selectedDay],
-        purchaseDate: new Date().toLocaleString('pt-BR'),
-        sector: `PISTA ${Math.floor(Math.random() * 3) + 1}`,
-        gate: `PORTÃO ${Math.floor(Math.random() * 10) + 1}`,
-        price: 'R$ 890,00'
-      };
-
-      setTicketData(ticket);
-      setCurrentStep('ticket');
-      setIsProcessing(false);
-      addLog('✅ Pagamento confirmado', `Ingresso ${ticket.id} gerado com sucesso`);
-    }, 3000);
-  };
-
-  const handlePrint = () => {
-    if (!ticketData) return;
-    addLog('🖨️ Solicitação de impressão', `Ingresso ID: ${ticketData.id}`);
-    window.print();
-  };
 
   const resetApplication = useCallback(() => {
     addLog('🔄 Sistema reiniciado', 'Nova sessão iniciada');
@@ -252,7 +76,122 @@ const RockInRioTickets = () => {
     setFormErrors({});
   }, [addLog]);
 
-  // ✅ TIPOS adicionados (evitam TS7006)
+  const handleTimeout = useCallback(() => {
+    addLog('⏰ Reserva expirada', 'Tempo limite de 10 minutos atingido');
+    alert('⏰ Tempo esgotado! Sua reserva expirou. Você será redirecionado para o início.');
+    resetApplication();
+  }, [addLog, resetApplication]);
+
+  useEffect(() => {
+    addLog('Sistema inicializado', 'Rock in Rio Tickets v1.0');
+  }, [addLog]);
+
+  useEffect(() => {
+    if (currentStep === 'queue' && queuePosition > 0) {
+      const timer = setInterval(() => {
+        setQueuePosition(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setCurrentStep('selectDay');
+            addLog('Acesso liberado', 'Usuário entrou no sistema de compra');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 2000);
+      return () => clearInterval(timer);
+    }
+  }, [currentStep, queuePosition, addLog]);
+
+  useEffect(() => {
+    if (currentStep === 'reservation' && reservationTime > 0) {
+      const timer = setInterval(() => {
+        setReservationTime(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            handleTimeout();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [currentStep, reservationTime, handleTimeout]);
+
+  const handleWelcomeStart = () => {
+    setCurrentStep('queue');
+    addLog('Usuário iniciou o processo', 'Entrando na fila de espera');
+  };
+
+  const handleDaySelection = (day: string) => {
+    setSelectedDay(day);
+    setCurrentStep('reservation');
+    addLog('🎫 Dia selecionado', `${lineup[day].date} - ${lineup[day].headliner}`);
+  };
+
+  const handleFormChange = (field: string, value: string) => {
+    setPaymentForm(prev => ({ ...prev, [field]: value }));
+    setFormErrors((prev: any) => ({ ...prev, [field]: '' }));
+  };
+
+  const validateForm = () => {
+    const errors: any = {};
+    
+    if (!paymentForm.name.trim()) errors.name = 'Nome é obrigatório';
+    if (!paymentForm.cpf.trim()) errors.cpf = 'CPF é obrigatório';
+    else if (paymentForm.cpf.length < 11) errors.cpf = 'CPF inválido';
+    
+    if (!paymentForm.email.trim()) errors.email = 'Email é obrigatório';
+    else if (!/\S+@\S+\.\S+/.test(paymentForm.email)) errors.email = 'Email inválido';
+    
+    if (!paymentForm.card.trim()) errors.card = 'Número do cartão é obrigatório';
+    else if (paymentForm.card.replace(/\s/g, '').length < 16) errors.card = 'Número do cartão inválido';
+    
+    if (!paymentForm.expiry.trim()) errors.expiry = 'Validade é obrigatória';
+    if (!paymentForm.cvv.trim()) errors.cvv = 'CVV é obrigatório';
+    else if (paymentForm.cvv.length < 3) errors.cvv = 'CVV inválido';
+
+    return errors;
+  };
+
+  const handlePayment = () => {
+    const errors = validateForm();
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      addLog('❌ Erro de validação', 'Dados do formulário incompletos ou inválidos');
+      return;
+    }
+
+    setIsProcessing(true);
+    addLog('💳 Processando pagamento', `Cartão final: ${paymentForm.card.slice(-4)}`);
+
+    setTimeout(() => {
+      const ticket = {
+        id: `RIR2024${Date.now().toString().slice(-8)}`,
+        name: paymentForm.name,
+        cpf: paymentForm.cpf,
+        email: paymentForm.email,
+        day: lineup[selectedDay!],
+        purchaseDate: new Date().toLocaleString('pt-BR'),
+        sector: `PISTA ${Math.floor(Math.random() * 3) + 1}`,
+        gate: `PORTÃO ${Math.floor(Math.random() * 10) + 1}`,
+        price: 'R$ 890,00'
+      };
+      
+      setTicketData(ticket);
+      setCurrentStep('ticket');
+      setIsProcessing(false);
+      addLog('✅ Pagamento confirmado', `Ingresso ${ticket.id} gerado com sucesso`);
+    }, 3000);
+  };
+
+  const handlePrint = () => {
+    addLog('🖨️ Solicitação de impressão', `Ingresso ID: ${ticketData.id}`);
+    window.print();
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -271,20 +210,12 @@ const RockInRioTickets = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div
-          className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: '1s' }}
-        ></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: '2s' }}
-        ></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      {/* Header */}
       <header className="relative bg-black/60 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -300,13 +231,11 @@ const RockInRioTickets = () => {
                 <p className="text-sm text-gray-400 font-medium">Sistema Oficial de Ingressos</p>
               </div>
             </div>
-
             <div className="hidden sm:flex items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-full">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-sm font-semibold text-green-400">Online</span>
               </div>
-
               {currentStep === 'ticket' && (
                 <button
                   onClick={resetApplication}
@@ -323,9 +252,7 @@ const RockInRioTickets = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Welcome Step */}
             {currentStep === 'welcome' && (
               <div className="space-y-6">
                 <div className="relative bg-gradient-to-br from-purple-900/80 to-pink-900/80 backdrop-blur-xl rounded-3xl p-8 sm:p-12 border border-white/20 shadow-2xl overflow-hidden">
@@ -377,26 +304,19 @@ const RockInRioTickets = () => {
                 </div>
 
                 <div className="grid sm:grid-cols-3 gap-4">
-                  {(Object.entries(lineup) as Array<[DayKey, (typeof lineup)[DayKey]]>).map(([key, day]) => (
-                    <div
-                      key={key}
-                      className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-pink-500/50 transition-all"
-                    >
-                      <div
-                        className={`inline-flex px-3 py-1 bg-gradient-to-r ${day.color} rounded-full text-xs font-bold mb-3`}
-                      >
+                  {Object.entries(lineup).map(([key, day]) => (
+                    <div key={key} className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-pink-500/50 transition-all">
+                      <div className={`inline-flex px-3 py-1 bg-gradient-to-r ${day.color} rounded-full text-xs font-bold mb-3`}>
                         {day.day}
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">{day.headliner}</h3>
                       <p className="text-sm text-gray-400">{day.genre}</p>
                     </div>
                   ))}
-
                 </div>
               </div>
             )}
 
-            {/* Queue Step */}
             {currentStep === 'queue' && (
               <div className="bg-black/40 backdrop-blur-xl rounded-3xl p-8 sm:p-12 border border-white/20 shadow-2xl">
                 <div className="text-center space-y-6">
@@ -434,7 +354,6 @@ const RockInRioTickets = () => {
               </div>
             )}
 
-            {/* Day Selection */}
             {currentStep === 'selectDay' && (
               <div className="space-y-6">
                 <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
@@ -446,11 +365,10 @@ const RockInRioTickets = () => {
                 </div>
 
                 <div className="grid gap-6">
-                  {(Object.entries(lineup) as Array<[DayKey, (typeof lineup)[DayKey]]>).map(([key, day]) => (
+                  {Object.entries(lineup).map(([key, day]) => (
                     <button
                       key={key}
                       onClick={() => handleDaySelection(key)}
-
                       className="group relative bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-pink-500 hover:bg-black/60 transition-all text-left overflow-hidden"
                     >
                       <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${day.color} opacity-0 group-hover:opacity-20 blur-3xl transition-opacity`}></div>
@@ -474,7 +392,7 @@ const RockInRioTickets = () => {
                           <div>
                             <p className="text-sm text-gray-400 mb-2">Mais atrações:</p>
                             <div className="flex flex-wrap gap-2">
-                              {day.bands.map((band, idx) => (
+                              {day.bands.map((band: string, idx: number) => (
                                 <span
                                   key={idx}
                                   className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-sm border border-white/20 transition-colors"
@@ -499,7 +417,6 @@ const RockInRioTickets = () => {
               </div>
             )}
 
-            {/* Payment Step */}
             {currentStep === 'reservation' && selectedDay && (
               <div className="space-y-6">
                 <div className={`relative bg-gradient-to-r ${reservationTime < 120 ? 'from-red-600/30 to-orange-600/30 border-red-500/50' : 'from-pink-600/30 to-purple-600/30 border-pink-500/50'} backdrop-blur-xl rounded-2xl p-6 border transition-all`}>
